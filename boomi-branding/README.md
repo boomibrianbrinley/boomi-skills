@@ -1,23 +1,37 @@
 # boomi-branding
 
-A [Claude Code](https://claude.ai/code) skill providing Boomi visual identity standards,
-UI component patterns, and brand reference material.
+**Consistent, on-brand Boomi output — every time.**
 
-Use this skill when building Boomi-branded HTML reports, dashboards, UI components, or
-any output that should conform to Boomi's design system.
+This skill gives Claude the Boomi design playbook: colors, typography, logo usage, icons,
+UI component patterns, and a ready-to-use HTML template. Any report, dashboard, or document
+Claude produces will look like it came from Boomi's own design team.
 
 ---
 
-## What's included
+## What it covers
 
-| File | Contents |
+| Reference | What it gives you |
 |---|---|
-| `references/colors.md` | Brand color palette, CSS variables, semantic usage rules |
-| `references/icons.md` | Phosphor Icons setup, common patterns, known rendering pitfalls |
-| `references/logos.md` | Inline SVG wordmark (preferred), base64 CSS fallbacks, sizing rules |
-| `references/components.md` | Card, badge, table, and layout patterns aligned to Boomi Exosphere |
-| `references/diagrams.md` | Architecture diagram conventions |
-| `references/html-template.md` | Starter HTML template with Boomi theme, fonts, and CSS wired up |
+| **Colors** | The full Boomi brand palette — coral, navy, purple, and supporting colors — with CSS variables and rules for when to use each one |
+| **Icons** | How to use Phosphor Icons (Boomi's icon library), common patterns, and a list of known rendering pitfalls to avoid |
+| **Logos** | The correct way to embed the Boomi wordmark — inline SVG for reliability, with sizing guidelines for headers, footers, reports, and compact layouts |
+| **Components** | Cards, badges, tables, and layout patterns that match the Boomi Exosphere design system |
+| **Diagrams** | Conventions for architecture and integration flow diagrams |
+| **HTML Template** | A complete starter template with Boomi fonts, colors, and CSS already wired up — ready to drop content into |
+
+---
+
+## When it kicks in
+
+This skill runs automatically when Claude is generating:
+
+- Health check reports or executive summaries
+- Release impact assessments
+- Any HTML output that should look like a Boomi product
+- UI components, dashboards, or mockups for Boomi-related tools
+
+You don't need to ask for it explicitly — other skills (like `boomi-health-check` and
+`boomi-release-analyzer`) call for it automatically when they produce formatted output.
 
 ---
 
@@ -32,42 +46,29 @@ bash <(curl -fsSL https://raw.githubusercontent.com/boomibrianbrinley/boomi-skil
 ### Windows (PowerShell)
 
 ```powershell
-irm https://raw.githubusercontent.com/boomibrianbrinley/boomi-skills/main/install.ps1 | iex
-# Then in the same session:
-# The script installs all discovered skills — to install only this one, clone first then run:
+git clone https://github.com/boomibrianbrinley/boomi-skills.git "$env:USERPROFILE\boomi-skills"
 & "$env:USERPROFILE\boomi-skills\install.ps1" -Skills boomi-branding
 ```
 
-### Manual (any platform)
+### Manual
 
 ```bash
-# 1. Clone the skills repo (or pull if already cloned)
 git clone https://github.com/boomibrianbrinley/boomi-skills.git ~/boomi-skills
-
-# 2. Symlink just this skill into Claude's global skills directory
 mkdir -p ~/.claude/skills
 ln -s ~/boomi-skills/boomi-branding ~/.claude/skills/boomi-branding
 ```
-
-Once linked, Claude Code loads this skill automatically in every project session — no
-per-project configuration needed.
 
 ---
 
 ## Add to a specific project (submodule)
 
-If you need the skill to travel with a project repo (so collaborators get it on `git clone`):
-
 ```bash
-# From your project root
 git submodule add -b main https://github.com/boomibrianbrinley/boomi-skills.git skills/boomi-skills
 git submodule update --init --recursive
 git commit -m "Add boomi-skills submodule"
 ```
 
-The skill will be available at `skills/boomi-skills/boomi-branding/`.
-
-After cloning a project that already has the submodule:
+After cloning a project that uses this submodule:
 
 ```bash
 git submodule update --init --recursive
@@ -78,22 +79,12 @@ git submodule update --init --recursive
 ## Updating
 
 ```bash
-cd ~/boomi-skills
-git pull
-```
-
-Changes are live immediately if you're using the global symlink approach.
-If using a submodule in a project, also run:
-
-```bash
-git submodule update --remote skills/boomi-skills
-git add skills/boomi-skills && git commit -m "Update boomi-skills to latest"
+cd ~/boomi-skills && git pull
 ```
 
 ---
 
 ## Design system reference
 
-This skill references the [Boomi Exosphere design system](https://exosphere.boomi.com).
-Where specific component specs or color tokens are documented in Exosphere, those take
-precedence over anything in this skill.
+This skill is built on the [Boomi Exosphere design system](https://exosphere.boomi.com).
+Where Exosphere specifies component or color details, those take precedence.

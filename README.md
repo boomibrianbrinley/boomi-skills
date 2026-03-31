@@ -15,20 +15,26 @@ repeating the same context in every conversation.
 
 ## Available Skills
 
-### `boomi-branding`
-Visual identity and UI standards for Boomi-branded outputs.
+### [`boomi-health-check`](boomi-health-check/README.md)
+A professional Boomi account health assessment covering runtime infrastructure, integration
+performance, security, deployment consistency, and API gateway health. Produces a graded
+report (A–F) with prioritized recommendations — as a quick summary, a branded HTML file,
+or a PowerPoint presentation ready to share with a customer.
 
-| Reference file | Contents |
-|---|---|
-| `references/colors.md` | Brand color palette, CSS variables, usage rules |
-| `references/icons.md` | Phosphor Icons setup, common patterns, known rendering pitfalls |
-| `references/logos.md` | Inline SVG wordmark (preferred), base64 CSS fallbacks, sizing rules |
-| `references/components.md` | Card, badge, table, and layout patterns |
-| `references/diagrams.md` | Architecture diagram conventions |
-| `references/html-template.md` | Starter HTML template with Boomi theme wired up |
+### [`boomi-release-analyzer`](boomi-release-analyzer/README.md)
+Answers "will this Boomi update break anything?" Fetches live release notes, cross-references
+them against your deployed integrations, and scores each one (HIGH / MEDIUM / LOW / NONE).
+Produces an upgrade impact report so you know exactly what needs attention before you upgrade.
 
-### `boomi-best-practices`
-Integration and development standards for Boomi AtomSphere projects.
+### [`boomi-branding`](boomi-branding/README.md)
+The Boomi design playbook for Claude — colors, typography, logos, icons, UI component patterns,
+and a ready-to-use HTML template. Any output Claude produces will look like it came from
+Boomi's own design team. Used automatically by other skills when generating reports.
+
+### [`boomi-best-practices`](boomi-best-practices/README.md)
+Ensures every recommendation Claude makes about your Boomi account is backed by official
+Boomi documentation. Before giving advice, it searches `help.boomi.com`, the Boomi Community,
+and release notes in real time — so guidance is current, cited, and trustworthy.
 
 ---
 
