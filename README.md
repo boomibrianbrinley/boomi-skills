@@ -86,6 +86,8 @@ git submodule update --init --recursive
 
 ## Updating Skills
 
+> For the full reference — editing, pushing, updating submodule pins, and new machine setup — see **[UPDATING-SKILLS.md](UPDATING-SKILLS.md)**.
+
 Edit files directly in your local clone:
 
 ```bash
