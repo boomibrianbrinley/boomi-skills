@@ -101,15 +101,25 @@ bash ~/boomi-skills/install.sh
 
 ## Setting up on a new machine
 
+### Claude Desktop (Mac)
 ```bash
-# macOS / Linux
 bash <(curl -fsSL https://raw.githubusercontent.com/boomibrianbrinley/boomi-skills/main/install.sh)
+```
+Then quit and reopen Claude Desktop — skills load on startup.
 
-# Windows PowerShell
+### Claude Desktop (Windows)
+```powershell
 irm https://raw.githubusercontent.com/boomibrianbrinley/boomi-skills/main/install.ps1 | iex
 ```
+Then quit and reopen Claude Desktop — skills load on startup.
 
-This clones `~/boomi-skills/`, creates `~/.claude/skills/`, and wires the symlinks.
+### Claude Code CLI (macOS / Linux / WSL)
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/boomibrianbrinley/boomi-skills/main/install.sh)
+```
+Available in your next Claude Code session — no restart needed.
+
+All scripts clone `~/boomi-skills/`, create `~/.claude/skills/`, and wire the symlinks.
 
 ---
 

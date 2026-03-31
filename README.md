@@ -36,26 +36,60 @@ Ensures every recommendation Claude makes about your Boomi account is backed by 
 Boomi documentation. Before giving advice, it searches `help.boomi.com`, the Boomi Community,
 and release notes in real time — so guidance is current, cited, and trustworthy.
 
+### [`boomi-reporting`](boomi-reporting/README.md)
+Generates executive summaries and execution reports from your live Boomi account data.
+Ask for a quick inline summary or a branded PDF scorecard — covering account activity,
+user changes, configuration events, integration performance, and anomaly detection.
+
 ---
 
 ## Installation
 
-### macOS / Linux / WSL / Git Bash
+Skills are installed into `~/.claude/skills/` — a directory that both **Claude Desktop**
+and **Claude Code CLI** load automatically. Install once and every project has access.
+
+### Claude Desktop (Mac) — install all skills
+
+Open Terminal and run:
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/boomibrianbrinley/boomi-skills/main/install.sh)
 ```
 
-### Windows (PowerShell)
+Then **quit and reopen Claude Desktop**. Skills load on startup.
+
+### Claude Desktop (Windows) — install all skills
+
+Open PowerShell and run:
 
 ```powershell
 irm https://raw.githubusercontent.com/boomibrianbrinley/boomi-skills/main/install.ps1 | iex
 ```
 
-Both scripts:
-1. Clone this repo to `~/boomi-skills/`
-2. Create `~/.claude/skills/` (or `%USERPROFILE%\.claude\skills\` on Windows)
-3. Symlink each skill in — Claude Code loads them automatically in every project
+Then **quit and reopen Claude Desktop**. Skills load on startup.
+
+### Claude Code CLI (macOS / Linux / WSL) — install all skills
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/boomibrianbrinley/boomi-skills/main/install.sh)
+```
+
+No restart needed — skills are available in your next Claude Code session.
+
+### Install a single skill
+
+Add the skill name as an argument to install only what you need:
+
+```bash
+# Mac / Linux
+bash <(curl -fsSL .../install.sh) boomi-health-check
+
+# Windows PowerShell (after cloning)
+& "$env:USERPROFILE\boomi-skills\install.ps1" -Skills boomi-health-check
+```
+
+> **Verifying the install:** In Claude Desktop or Claude Code, ask
+> *"What skills do you have available?"* — installed skills will be listed.
 
 > **Windows note:** Symlinks require Developer Mode or Administrator privileges.
 > The PowerShell installer falls back to Directory Junctions automatically if neither is available.

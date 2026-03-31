@@ -67,26 +67,43 @@ Ask Claude something like:
 
 ## Install this skill only
 
-### macOS / Linux / WSL / Git Bash
+### Claude Desktop (Mac)
+
+Run the installer in your terminal, then restart Claude Desktop:
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/boomibrianbrinley/boomi-skills/main/install.sh) boomi-health-check
 ```
 
-### Windows (PowerShell)
+After the script completes, quit and reopen Claude Desktop. The skill loads automatically.
+
+### Claude Desktop (Windows)
+
+Open PowerShell and run:
 
 ```powershell
 git clone https://github.com/boomibrianbrinley/boomi-skills.git "$env:USERPROFILE\boomi-skills"
 & "$env:USERPROFILE\boomi-skills\install.ps1" -Skills boomi-health-check
 ```
 
-### Manual
+After the script completes, quit and reopen Claude Desktop. The skill loads automatically.
+
+### Claude Code CLI (macOS / Linux / WSL)
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/boomibrianbrinley/boomi-skills/main/install.sh) boomi-health-check
+```
+
+### Manual (any platform)
 
 ```bash
 git clone https://github.com/boomibrianbrinley/boomi-skills.git ~/boomi-skills
 mkdir -p ~/.claude/skills
 ln -s ~/boomi-skills/boomi-health-check ~/.claude/skills/boomi-health-check
 ```
+
+> **Verifying the install:** In Claude Desktop, start a new conversation and ask
+> *"What skills do you have available?"* — you should see `boomi-health-check` listed.
 
 ---
 
