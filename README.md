@@ -6,6 +6,11 @@ Skills in this repo provide Claude with Boomi-specific design standards, coding 
 and reference material so that any project can produce consistent, on-brand output without
 repeating the same context in every conversation.
 
+> **⚠ Temporary home.** This repo is a shared starting point for the team while we work toward
+> a permanent shared repository under a team or organization license. Once that's in place, the
+> canonical location will move and this repo will redirect accordingly. In the meantime, treat
+> this as the working source of truth.
+
 ---
 
 ## Available Skills
