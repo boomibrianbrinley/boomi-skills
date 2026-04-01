@@ -26,6 +26,16 @@ Boomi platform release notes against the user's deployed integration processes.
 6. **Analyze + score** each deployed process
 7. **Output** Boomi-branded HTML report
 
+### Step Gate Conditions
+
+| Step | Gate — halt if… | Gate — skip if… |
+|---|---|---|
+| Step 1 (Release notes) | No release notes found after 3 search attempts — ask user to paste URL | — |
+| Step 2 (Deployed components) | `boomi_list_deployed_packages` returns auth error — STOP | Returns 0 processes — note empty env, skip scoring, output "NO IMPACT" |
+| Step 3 (Impact scoring) | — | All processes are NONE — skip Technical Appendix even for Full mode |
+| Step 4 (Report) | — | If only Quick requested, skip Technical Appendix section |
+| Upgrade Gate | Any process scored HIGH — decision is "Conditional" or "No" | All processes NONE — decision is "Yes" |
+
 For full analysis workflow → see sections below.
 For branded HTML output → read the `boomi-branding` skill before generating HTML.
 For PDF output → read the `boomi-reporting` skill.
@@ -113,6 +123,37 @@ Score each deployed process against each release note change:
 - No High, any Medium → account impact: **MEDIUM**
 - Only Low → account impact: **LOW**
 - All None → **NO IMPACT**
+
+---
+
+## Upgrade Gate
+
+After scoring, derive an explicit upgrade recommendation. This is **always required** — include it prominently in the report header, above the impact table.
+
+| Condition | Decision | Label |
+|---|---|---|
+| No High or Medium findings | **Yes** — safe to upgrade | 🟢 Safe to Upgrade |
+| Only Medium findings, no High | **Conditional** — review and test first | 🟡 Conditional |
+| Any High finding | **Conditional or No** — remediate before upgrading | 🟠 Remediate First |
+| Critical connector or runtime change with no workaround | **No** — do not upgrade until resolved | 🔴 Do Not Upgrade |
+
+### Upgrade Gate block (always include in report)
+
+```
+## Upgrade Recommendation
+Decision: [Yes / Conditional / Remediate First / Do Not Upgrade]
+Reason:   [1–2 sentences citing the highest-severity finding]
+Pre-conditions to upgrade (if Conditional):
+  1. [Specific action required]
+  2. [Specific action required]
+```
+
+**Never** omit this block even if impact is NO IMPACT — in that case, output:
+```
+## Upgrade Recommendation
+Decision: Yes — Safe to Upgrade
+Reason:   No breaking changes detected for any deployed process in this environment.
+```
 
 ---
 

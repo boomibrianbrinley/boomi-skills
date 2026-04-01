@@ -27,6 +27,42 @@ Use this skill when the user asks for:
 
 ---
 
+## Scope and Constraints
+
+**This skill is read-only.** It NEVER:
+- Creates, modifies, or deletes any Boomi component, process, or configuration
+- Triggers executions or deployments
+- Changes role assignments, environment settings, or runtime properties
+- Writes to any external system
+
+All MCP tool calls made by this skill are **read operations only** (`boomi_get_*`, `boomi_list_*`, `boomi_query_*`, `boomi_health_check_summary`). If a user requests an action (e.g. "fix this", "apply the recommendation"), clarify that the skill identifies and reports — it does not remediate.
+
+---
+
+## Step 0 — Discovery: Capability Check
+
+Before running any analysis, call `boomi_get_account_info` to determine what capabilities are available for this account. This prevents wasted tool calls on features the account tier doesn't support.
+
+```
+boomi_get_account_info(accountId: "<id or omit for default>")
+```
+
+Check the response and set these flags internally:
+
+| Field | Check | If missing/false |
+|---|---|---|
+| `apiType` | Is API Management enabled? | Skip `apiGateway` check — set to `info` |
+| `expirationDate` | Within 90 days? | Flag as high-priority licensing finding |
+| `moleculeEntitlement` | Is Molecule licensed? | Note if Molecule runtimes are present without entitlement |
+| `supportLevel` | Is support active? | Include in licensing section |
+
+Tell the user: _"Checking account capabilities before starting analysis…"_
+
+**Gate:** If `boomi_get_account_info` returns an error or empty response, STOP and tell the user:
+> "I couldn't retrieve account info. Please verify the account ID and that your credentials have read access, then retry."
+
+---
+
 ## Step 1 — Select account and environments
 
 If the user has not specified an account, call `boomi_list_accounts` and ask them to choose.
@@ -38,6 +74,9 @@ Common shortcuts:
 - "prod" / "production only" → pass `environments: "production"`
 - "everything" / "all" → pass `environments: "all"`
 - Named envs → pass `environments: ["ENV_NAME_1", "ENV_NAME_2"]`
+
+**Gate:** If no environments exist in scope, STOP:
+> "No environments found for this account in the selected scope. Please verify the account or select a different scope."
 
 ---
 
@@ -56,6 +95,8 @@ Record and include in the report:
 - API type and entitlement status
 - Molecule entitlement (note if molecule usage exceeds entitlement)
 
+**Gate:** If account info is unavailable after Step 0, skip licensing details and note: _"Account details unavailable — licensing section omitted."_ Proceed to Step 3.
+
 ---
 
 ## Step 3 — Call boomi_health_check_summary
@@ -71,6 +112,11 @@ boomi_health_check_summary(
 ```
 
 Tell the user: _"Running health checks across [N] environments — this may take 20–30 seconds…"_
+
+**Gate:** If `boomi_health_check_summary` fails or returns no checks:
+- If error is auth-related: STOP and surface the error to the user
+- If error is timeout: Retry once; if it fails again, note partial data and proceed with available checks
+- If response has no environments in scope: STOP — confirm environment selection with user
 
 ---
 
@@ -320,6 +366,27 @@ All actionable findings must use the `√` prefix and `#0A9268` green color:
 
 ---
 
+## Step 6.5 — Self-Review Checklist
+
+Before generating the final report, verify each item:
+
+| # | Check | Required? |
+|---|---|---|
+| 1 | All 6 check categories have a status (pass/warn/fail/info) | Yes — never omit a category |
+| 2 | Every `fail` and `warn` finding has at least one recommendation | Yes |
+| 3 | Recommendations table has Priority, Area, Finding, and Action columns | Yes |
+| 4 | Overall grade (A/B/C/D/F) matches the scoring logic in Step 5 | Yes |
+| 5 | Licensing section includes account name, support tier, expiration date | Yes |
+| 6 | Runtime inventory includes JVM heap, version, release schedule, disk % | Yes |
+| 7 | If `apiGateway` was set to `info` (API not enabled), report notes why | Yes |
+| 8 | Boomi design system colors and fonts applied (if HTML/PowerPoint) | Yes for non-inline |
+| 9 | CONFIDENTIAL badge included (if PDF/HTML artifact) | Yes for file output |
+| 10 | Report footer includes generation date, environment scope, analysis window | Yes for file output |
+
+If any required item is missing, correct it before proceeding to Step 7.
+
+---
+
 ## Step 7 — Recommendations format
 
 **Recommendations are always required** — never omit this section. Generate one or more recommendations for every finding, including licensing, runtime configuration, and all six health checks. Use the √ prefix convention and green color (`#0A9268`) when rendered.
@@ -363,3 +430,55 @@ Always translate technical statuses into business-friendly language:
 | Env Consistency | "Deployment pipeline healthy" | "Some changes pending production promotion" | N/A |
 | Security | "Access controls properly configured" | "Some governance gaps to address" | "Critical security configuration issues" |
 | API Gateway | "APIs operating normally" | "Some APIs have no active consumers" | "API gateway outage detected" |
+
+---
+
+## Error Handling and Recovery
+
+Use this table when any MCP tool call fails during the health check:
+
+| Tool | Error type | Recovery action |
+|---|---|---|
+| `boomi_get_account_info` | Auth error / 401 | STOP — surface credentials error to user |
+| `boomi_get_account_info` | Empty response | Proceed without licensing section; note in report |
+| `boomi_health_check_summary` | Timeout | Retry once; if still fails, note partial data, proceed |
+| `boomi_health_check_summary` | Auth error | STOP — surface error |
+| `boomi_health_check_summary` | Empty `checks` | STOP — ask user to verify environment selection |
+| `boomi_list_runtimes` | No runtimes returned | Set runtimeStatus = `info`, note no runtimes found |
+| `boomi_get_runtime_details` | Error for one runtime | Skip that runtime; note it by ID in report with ⚠️ |
+| `boomi_get_runtime_details` | All runtimes error | Set runtime config section to "unavailable" |
+| Best practices WebSearch | No results / blocked | Proceed with built-in guidance; note live docs unavailable |
+
+**General rule:** A single tool failure should never abort the entire health check. Degrade gracefully — note what's missing, set the affected check to `info`, and continue. Only STOP for auth failures (credentials problem requires user action).
+
+---
+
+## Memory and Context — Baseline for Next Session
+
+After delivering the final report, offer to copy a baseline summary the user can paste into the next conversation:
+
+```
+## Boomi Account Baseline — [ACCOUNT NAME] — [DATE]
+- **Grade:** [A/B/C/D/F]
+- **Overall status:** [pass | warn | fail]
+- **Checks:** [N pass, N warn, N fail, N info]
+- **Key findings:** [1–3 bullet points of the most important findings]
+- **Open recommendations:** [count of critical/high items]
+- **Analysis window:** [daysBack] days ending [date]
+- **Environments:** [scope]
+```
+
+Say: _"Here's a baseline snapshot you can paste at the start of your next health check conversation to track improvement over time."_
+
+---
+
+## Feedback Collection
+
+After delivering the report, ask:
+
+> "Was this health check report useful? Anything I should include, skip, or present differently next time?"
+
+If the user provides feedback:
+- Acknowledge it specifically
+- Note any structural change requests (e.g. "add a cost analysis section", "skip API gateway if we don't use it") so they can inform future invocations of this skill
+- If the feedback suggests a standing change to how this skill runs, surface it with: _"You may want to note this preference for future health checks."_

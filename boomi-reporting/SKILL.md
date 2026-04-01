@@ -142,3 +142,22 @@ Examples:
 - `boomi_weekly_scorecard_20260329.pdf`
 - `boomi_execution_report_20260329.pdf`
 - `boomi_executive_summary_20260329.pdf`
+
+---
+
+## Memory and Context — Baseline for Next Session
+
+After delivering the report, offer a copy-paste baseline the user can carry forward:
+
+```
+## Boomi Reporting Baseline — [ACCOUNT NAME] — [DATE]
+- **Report type:** [executive | execution | both]
+- **Time range:** [start] to [end]
+- **Total executions:** [N production + N test]
+- **Pass rate:** [N%]
+- **Top processes by volume:** [top 3 names]
+- **Anomalies detected:** [N or "none"]
+- **Key finding:** [1–2 sentences]
+```
+
+Say: _"Here's a snapshot you can paste into your next reporting session to track trends over time."_

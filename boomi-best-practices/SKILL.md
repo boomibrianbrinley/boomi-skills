@@ -530,3 +530,16 @@ Use this framework to assign priority to all best practice recommendations:
 | 🟡 P3 Medium | Best practice deviation with moderate risk | Error rate 5-15%, processes missing error handling |
 | 🟢 P4 Low | Hygiene improvements, optimization opportunities | Dead processes not cleaned up, deployment notes missing |
 | ℹ️ P5 Advisory | "Nice to have" or future-state improvements | New Boomi feature that could simplify current approach |
+
+---
+
+## Feedback Collection
+
+After delivering best practice recommendations, ask:
+
+> "Were these recommendations relevant to your environment? Any areas I should go deeper on, or skip in future reviews?"
+
+If the user provides feedback:
+- Note any categories they've already addressed ("we have HA covered") — skip those in future enrichment passes
+- Note any areas they want prioritized ("we care most about security") — weight those higher
+- If the user identifies a recommendation as outdated or inapplicable, acknowledge it and note that live WebSearch should always be the source of truth over any cached guidance in this skill
