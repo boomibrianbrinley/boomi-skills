@@ -25,7 +25,7 @@ if [ $# -gt 0 ]; then
   SKILLS=("$@")
 else
   # Default: add all known skills
-  SKILLS=("boomi-branding" "boomi-best-practices")
+  SKILLS=("boomi-branding" "boomi-best-practices" "agentic-design-patterns")
 fi
 
 echo ""
