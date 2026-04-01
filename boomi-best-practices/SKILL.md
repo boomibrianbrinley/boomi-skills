@@ -65,20 +65,71 @@ site:community.boomi.com "tip" OR "guide" [topic]
 
 ## Best Practice Categories
 
+Seven categories aligned to Boomi's product surface. Each category maps to one or more health check areas and can be owned by a standalone skill.
+
+| # | Category | Health check mapping | Skill surface |
+|---|---|---|---|
+| §1 | Account & Licensing | account info, entitlements | `boomi-health-check` Step 2 |
+| §2 | Runtime Infrastructure | `runtimeStatus`, `runtimeConfig` | `boomi-health-check` Step 3b |
+| §3 | Integration Design | `deadProcesses`, `executionHealth` | `boomi-health-check` Step 4 |
+| §4 | Deployment & Environments | `envConsistency` | `boomi-health-check` Step 4 |
+| §5 | Execution & Observability | `executionHealth`, `deadProcesses` | `boomi-health-check` Step 4 |
+| §6 | Security & Governance | `security` | `boomi-health-check` Step 4 |
+| §7 | API Management | `apiGateway` | `boomi-health-check` Step 4 |
+
 ---
 
-### 1. Runtime Configuration & Performance
+### §1 Account & Licensing
 
-**Health check mapping:** `runtimeStatus`, `runtimeConfig` (SOON check)
+**Health check mapping:** Account info, entitlements, support tier, expiration
 
 **What good looks like:**
-- All runtimes ONLINE with version within 1-2 releases of current
+- Support tier is active and not expiring within 90 days
+- Entitlements match actual usage (API type, Molecule license, connection count)
+- User accounts are active and associated with real individuals (no orphaned service accounts)
+- Account has a named administrator or owner contact on record
+- License utilization reviewed quarterly to avoid overages or unnecessary entitlements
+
+**Common anti-patterns to flag:**
+- Support expiring within 90 days with no renewal in progress
+- Molecule runtimes deployed but Molecule entitlement not active
+- API Management features in use but API entitlement is "NONE"
+- Orphaned user accounts for former employees still active
+- Account approaching connection limit with no license review scheduled
+
+**WebSearch queries to run:**
+```
+site:help.boomi.com account management entitlements
+site:help.boomi.com support tier renewal boomi
+site:community.boomi.com boomi license management best practices
+"boomi atomsphere" account entitlement molecule license
+site:help.boomi.com user management deactivate account
+```
+
+**Key documentation areas on help.boomi.com:**
+- Platform → Account Management → Licensing and Entitlements
+- Platform → Account Management → User Management
+- Platform → Account Management → Support Access
+
+**Recommendation framing:**
+> "Your support agreement expires on [date]. Boomi recommends initiating renewal 60 days in advance to avoid a lapse in support coverage."
+
+---
+
+### §2 Runtime Infrastructure
+
+**Health check mapping:** `runtimeStatus`, runtime configuration, business continuity
+
+**What good looks like:**
+- All runtimes ONLINE with version within 1–2 releases of current
 - JVM heap sized appropriately for workload (minimum 1GB, recommended 2–4GB for production)
 - Working data directory on fast local I/O (SSD), not network-mounted storage
 - Purge history configured (recommended: 30–60 days, never 0/disabled in production)
 - Observability/logging enabled and pointed at a log aggregator
 - Release schedule set to SCHEDULED (not MANUAL) unless intentional for the environment
-- Molecule nodes balanced with appropriate thread counts
+- Production Molecules have ≥ 2 nodes (HA configuration)
+- Disaster recovery runbook documented and tested annually
+- Atom-level certificates (SSL/TLS, PGP) valid and not expiring within 30 days
 
 **Common anti-patterns to flag:**
 - Runtime on same host as database or other memory-intensive services
@@ -86,7 +137,9 @@ site:community.boomi.com "tip" OR "guide" [topic]
 - Purge history disabled (`purgeHistoryDays: 0`) — causes unbounded disk growth
 - Runtime version 3+ releases behind current — security exposure + unsupported configuration
 - MANUAL release schedule on production runtimes without a documented reason
-- Single-node Molecule in production (no HA)
+- Single-node Molecule in production (single point of failure)
+- No documented runbook for runtime failure or outage
+- Atom-level certificates expired or within 30 days of expiry
 
 **WebSearch queries to run:**
 ```
@@ -94,9 +147,11 @@ site:help.boomi.com atom startup properties
 site:help.boomi.com "working data" directory performance
 site:help.boomi.com "purge history" settings
 site:community.boomi.com atom JVM heap best practices
-"boomi molecule" sizing recommendations
+"boomi molecule" sizing recommendations high availability
 site:help.boomi.com runtime release schedule
-"boomi atom" "working directory" SSD performance
+site:help.boomi.com Molecule high availability configuration
+site:community.boomi.com disaster recovery boomi best practices
+site:help.boomi.com certificate management renewal atom
 ```
 
 **Key documentation areas on help.boomi.com:**
@@ -104,6 +159,7 @@ site:help.boomi.com runtime release schedule
 - Integration → Atom Management → Runtime Release Schedules
 - Integration → Atom Management → Observability Settings
 - Integration → Molecule & Cloud Configuration
+- Platform → Certificates → Atom Certificates
 
 **Release notes check:**
 ```
@@ -115,9 +171,11 @@ site:help.boomi.com runtime release schedule
 
 ---
 
-### 2. Process Design & Code Quality
+### §3 Integration Design
 
-**Health check mapping:** `integrationPatterns` (SOON check), enriches `executionHealth` and `deadProcesses`
+**Health check mapping:** `deadProcesses`, enriches `executionHealth`
+
+Covers both general process design patterns and specialized integration patterns including EDI and trading partner management.
 
 **What good looks like:**
 - All deployed processes have error handling (Try/Catch shape or equivalent)
@@ -127,6 +185,7 @@ site:help.boomi.com runtime release schedule
 - Tracking fields populated for operational visibility
 - Processes with high error rates have retry logic configured
 - No processes with unbounded loops or missing Stop shapes on error paths
+- Hard-coded values replaced with environment extensions or dynamic process properties
 
 **Common anti-patterns to flag:**
 - Processes with no Try/Catch and error rate > 0%
@@ -153,103 +212,40 @@ site:community.boomi.com "dead process" cleanup
 - Integration → Building Integrations → Process Properties
 - Integration → Building Integrations → Subprocesses and Process Call
 
-**Recommendation framing:**
-> "Boomi recommends wrapping all process flows in a Try/Catch shape to ensure errors are captured and routed. [X] of your deployed processes have no error handling. See: help.boomi.com → Building Integrations → Error Handling."
+#### §3a — EDI & Trading Partner Design
 
----
-
-### 3. Execution Health & Operations
-
-**Health check mapping:** `executionHealth`, `deadProcesses`, `scheduleConflicts` (SOON check)
-
-**Baseline thresholds (Boomi community consensus):**
-| Error Rate | Classification | Action |
-|---|---|---|
-| < 2% | Healthy | Monitor |
-| 2–5% | Elevated | Investigate top errors |
-| 5–15% | Degraded | Prioritize remediation |
-| > 15% | Critical | Immediate action required |
+Applies when EDI processes or trading partners are present in the account.
 
 **What good looks like:**
-- Production error rate < 5% (target < 2%)
-- All deployed processes executed at least once per business cycle
-- Scheduled processes staggered to avoid concurrent resource contention
-- Execution history searchable (tracking fields populated, execution summary meaningful)
-- Alerts configured for process failures (audit log or external monitoring)
+- Every trading partner has a unique ISA identifier (no duplicates)
+- Production mode set to "Production" (not "Test") for live trading partners
+- Acknowledgment modes configured per trading partner agreement
+- Shared communication channels used for partners on the same protocol
+- Trading partner processing groups link partners to processes
+- AS2 certificates renewed before expiry
+- EDI documents tracked with custom tracked fields for operational visibility
 
 **Common anti-patterns to flag:**
-- High-frequency schedules (every minute) on resource-intensive processes
-- Multiple processes scheduled at the same minute without load balancing
-- Processes with consistent ABORTED status (indicates runtime resource pressure)
-- Executions with high inboundErrorDocumentCount but status COMPLETE (silent failures)
-- No monitoring/alerting configured beyond Boomi's native notifications
+- Duplicate ISA identifiers across trading partners (causes routing ambiguity)
+- Trading partners marked as "Test" transmitting live documents
+- No processing groups linking trading partners to processes (broken routing)
+- AS2 certificates expired or within 30 days of expiry
+- All EDI flows using a single generic process rather than partner-specific subprocesses
 
 **WebSearch queries to run:**
 ```
-site:help.boomi.com execution record monitoring
-site:community.boomi.com execution "error rate" threshold
-"boomi" process schedule overlap best practices
-site:help.boomi.com "process scheduling" concurrent
-"boomi atomsphere" execution monitoring alerting
-site:community.boomi.com "silent failure" OR "error document" boomi
-site:help.boomi.com "custom tracked fields" execution history
-```
-
-**Release notes check:**
-```
-"boomi release notes" "execution" OR "scheduler" 2024 OR 2025
+site:help.boomi.com trading partner management best practices
+site:help.boomi.com AS2 certificate renewal
+site:community.boomi.com EDI trading partner best practices
+"boomi" ISA identifier duplicate routing
+site:help.boomi.com "processing group" EDI routing
+"boomi atomsphere" EDI error handling acknowledgment
+site:help.boomi.com shared communication channel configuration
 ```
 
 ---
 
-### 4. Security & Governance
-
-**Health check mapping:** `security`
-
-**What good looks like:**
-- Each user has the minimum roles required for their function (least privilege)
-- No user has more than 2–3 roles unless there is a documented business reason
-- All PRODUCTION environments have role restrictions configured
-- Custom roles used for fine-grained control rather than relying entirely on built-in roles
-- API tokens rotated on a defined schedule (recommended: 90 days)
-- User access reviewed quarterly
-- Audit log monitoring enabled for DELETE, user management, and environment changes
-- Service accounts use dedicated API tokens (not personal user tokens)
-
-**Common anti-patterns to flag:**
-- Users with Administrator + Environment Management + full Build privileges simultaneously
-- PRODUCTION environments with no role restrictions (open to all users with Env Mgmt)
-- Personal email addresses used as service account usernames
-- API tokens that have never been rotated (check audit log for token creation date)
-- Accounts with no custom roles (over-reliance on broad built-in roles)
-- Audit log not monitored or reviewed
-
-**WebSearch queries to run:**
-```
-site:help.boomi.com role "least privilege" security
-site:help.boomi.com "environment role" restrictions production
-site:community.boomi.com security best practices boomi
-"boomi atomsphere" RBAC role-based access control
-site:help.boomi.com API token management rotation
-site:help.boomi.com "AccountUserRole" privileges
-"boomi" user access review audit log monitoring
-site:help.boomi.com audit log event types
-```
-
-**Key documentation areas on help.boomi.com:**
-- Platform → Security → User Management
-- Platform → Security → Role-Based Access
-- Platform → Security → Environment Roles
-- Platform → API Management → API Tokens
-
-**Release notes check:**
-```
-"boomi release notes" "security" OR "roles" OR "permissions" 2024 OR 2025
-```
-
----
-
-### 5. Environment Consistency & Deployment
+### §4 Deployment & Environments
 
 **Health check mapping:** `envConsistency`
 
@@ -287,19 +283,115 @@ site:community.boomi.com "environment consistency" deployment
 
 ---
 
-### 6. API Gateway & API Management
+### §5 Execution & Observability
+
+**Health check mapping:** `executionHealth`, `deadProcesses`
+
+**Baseline thresholds (Boomi community consensus):**
+| Error Rate | Classification | Action |
+|---|---|---|
+| < 2% | Healthy | Monitor |
+| 2–5% | Elevated | Investigate top errors |
+| 5–15% | Degraded | Prioritize remediation |
+| > 15% | Critical | Immediate action required |
+
+**What good looks like:**
+- Production error rate < 5% (target < 2%)
+- All deployed processes executed at least once per business cycle
+- Scheduled processes staggered to avoid concurrent resource contention
+- Execution history searchable (tracking fields populated, execution summary meaningful)
+- Alerts configured for process failures (audit log or external monitoring)
+- Dashboards or external observability tooling reflect real-time execution health
+
+**Common anti-patterns to flag:**
+- High-frequency schedules (every minute) on resource-intensive processes
+- Multiple processes scheduled at the same minute without load balancing
+- Processes with consistent ABORTED status (indicates runtime resource pressure)
+- Executions with high inboundErrorDocumentCount but status COMPLETE (silent failures)
+- No monitoring/alerting configured beyond Boomi's native notifications
+- No component backup/export schedule for disaster recovery
+
+**WebSearch queries to run:**
+```
+site:help.boomi.com execution record monitoring
+site:community.boomi.com execution "error rate" threshold
+"boomi" process schedule overlap best practices
+site:help.boomi.com "process scheduling" concurrent
+"boomi atomsphere" execution monitoring alerting
+site:community.boomi.com "silent failure" OR "error document" boomi
+site:help.boomi.com "custom tracked fields" execution history
+```
+
+**Release notes check:**
+```
+"boomi release notes" "execution" OR "scheduler" 2024 OR 2025
+```
+
+---
+
+### §6 Security & Governance
+
+**Health check mapping:** `security`
+
+**What good looks like:**
+- Each user has the minimum roles required for their function (least privilege)
+- No user has more than 2–3 roles unless there is a documented business reason
+- All PRODUCTION environments have role restrictions configured
+- Custom roles used for fine-grained control rather than relying entirely on built-in roles
+- API tokens and credentials rotated on a defined schedule (recommended: 90 days)
+- User access reviewed quarterly; former employees promptly deactivated
+- Audit log monitoring enabled for DELETE, user management, and environment changes
+- Service accounts use dedicated API tokens (not personal user tokens)
+
+**Common anti-patterns to flag:**
+- Users with Administrator + Environment Management + full Build privileges simultaneously
+- PRODUCTION environments with no role restrictions (open to all users with Env Mgmt)
+- Personal email addresses used as service account usernames
+- API tokens that have never been rotated (check audit log for token creation date)
+- Accounts with no custom roles (over-reliance on broad built-in roles)
+- Audit log not monitored or reviewed
+
+**WebSearch queries to run:**
+```
+site:help.boomi.com role "least privilege" security
+site:help.boomi.com "environment role" restrictions production
+site:community.boomi.com security best practices boomi
+"boomi atomsphere" RBAC role-based access control
+site:help.boomi.com API token management rotation
+site:help.boomi.com "AccountUserRole" privileges
+"boomi" user access review audit log monitoring
+site:help.boomi.com audit log event types
+```
+
+**Key documentation areas on help.boomi.com:**
+- Platform → Security → User Management
+- Platform → Security → Role-Based Access
+- Platform → Security → Environment Roles
+- Platform → API Management → API Tokens
+
+**Release notes check:**
+```
+"boomi release notes" "security" OR "roles" OR "permissions" 2024 OR 2025
+```
+
+---
+
+### §7 API Management
 
 **Health check mapping:** `apiGateway`
+
+Covers API gateway infrastructure, API lifecycle management, application subscriptions, and all certificate/token expiry concerns at the gateway layer.
 
 **What good looks like:**
 - All gateways ACTIVE with auto-scaling configured for production traffic
 - All deployed APIs have at least one active subscriber
 - API plans configured with rate limits (no unlimited plans in production without justification)
 - APIs versioned using semantic versioning
-- SSL/TLS configured with valid, non-expired certificates on all gateway endpoints
+- SSL/TLS certificates on all gateway endpoints valid and not expiring within 30 days
 - Consumer applications use meaningful names (not "App 1", "Test App")
 - Deprecated API versions have a documented sunset date communicated to consumers
 - Gateway memory and CPU monitored via observability tooling
+- Certificate renewal process documented and tested
 
 **Common anti-patterns to flag:**
 - Deployed APIs with zero subscribers (dead API surface — security exposure)
@@ -308,6 +400,8 @@ site:community.boomi.com "environment consistency" deployment
 - Multiple applications sharing the same subscription/plan
 - APIs deployed to production gateway not exposed through a staging gateway first
 - Certificate expiry within 30 days on any gateway endpoint
+- Self-signed certificates in production gateway endpoints
+- API tokens with no documented expiry or rotation schedule
 
 **WebSearch queries to run:**
 ```
@@ -319,110 +413,16 @@ site:help.boomi.com API versioning semantic
 "boomi" API gateway SSL certificate management
 site:help.boomi.com "deployed API" subscriber management
 site:developer.boomi.com API management gateway
+site:help.boomi.com certificate management renewal gateway
+"boomi release notes" "API management" OR "gateway" 2024 OR 2025
 ```
 
 **Key documentation areas:**
 - API Management → Gateway Configuration
 - API Management → API Policies and Plans
 - API Management → Applications and Subscriptions
+- Platform → Certificates → Gateway Certificates
 - developer.boomi.com → Boomi API Reference → API Management
-
-**Release notes check:**
-```
-"boomi release notes" "API management" OR "gateway" 2024 OR 2025
-```
-
----
-
-### 7. EDI & Trading Partner Management
-
-**Health check mapping:** EDI-specific extension of `executionHealth`
-
-**What good looks like:**
-- Every trading partner has a unique ISA identifier (no duplicates)
-- Production mode set to "Production" (not "Test") for live trading partners
-- Acknowledgment modes configured per trading partner agreement
-- Shared communication channels used for partners on the same protocol
-- Trading partner processing groups link partners to processes
-- AS2 certificates renewed before expiry
-- EDI documents tracked with custom tracked fields for operational visibility
-
-**Common anti-patterns to flag:**
-- Duplicate ISA identifiers across trading partners (causes routing ambiguity)
-- Trading partners marked as "Test" transmitting live documents
-- No processing groups linking trading partners to processes (broken routing)
-- AS2 certificates expired or within 30 days of expiry
-- All EDI flows using a single generic process rather than partner-specific subprocesses
-
-**WebSearch queries to run:**
-```
-site:help.boomi.com trading partner management best practices
-site:help.boomi.com AS2 certificate renewal
-site:community.boomi.com EDI trading partner best practices
-"boomi" ISA identifier duplicate routing
-site:help.boomi.com "processing group" EDI routing
-"boomi atomsphere" EDI error handling acknowledgment
-site:help.boomi.com shared communication channel configuration
-```
-
----
-
-### 8. Certificate & Token Expiry
-
-**Health check mapping:** `certificates` (SOON check)
-
-**What good looks like:**
-- No deployed expired certificates
-- Certificate expiry monitored with alerts ≥ 30 days in advance
-- Token expiry tracked in a secrets management system
-- Certificate renewal process documented and tested
-- Wildcard certificates used where appropriate to reduce maintenance overhead
-
-**Common anti-patterns to flag:**
-- Expired certificates deployed (will cause immediate connectivity failures)
-- Certificates expiring within 30 days with no renewal in progress
-- Self-signed certificates in production
-- API tokens with no documented expiry or rotation schedule
-
-**WebSearch queries to run:**
-```
-site:help.boomi.com certificate management renewal
-site:help.boomi.com "DeployedExpiredCertificate" OR "certificate expiry"
-site:community.boomi.com certificate renewal boomi atom
-"boomi atomsphere" SSL certificate best practices
-site:help.boomi.com PGP certificate management
-```
-
----
-
-### 9. Business Continuity & Resilience
-
-**Health check mapping:** `businessContinuity` (SOON check)
-
-**What good looks like:**
-- Production Molecules have ≥ 2 nodes (HA configuration)
-- Disaster recovery runbook documented and tested annually
-- Boomi Cloud Atoms used where on-premise HA is not feasible
-- Runtime upgrade schedule aligned with Boomi's quarterly release cycle
-- Backup of process components and account configuration maintained (export/backup)
-- Critical process failures trigger PagerDuty/Opsgenie/email alerts
-
-**Common anti-patterns to flag:**
-- Single-node Molecule in production (SPOF)
-- No documented runbook for runtime failure
-- Runtimes running versions more than 3 releases behind (unsupported configuration)
-- No external monitoring of process execution health (Boomi-only alerting)
-- No component backup/export schedule
-
-**WebSearch queries to run:**
-```
-site:help.boomi.com Molecule high availability configuration
-site:community.boomi.com disaster recovery boomi best practices
-"boomi atomsphere" high availability HA molecule cluster
-site:help.boomi.com "runtime upgrade" release schedule
-"boomi" backup export components account
-site:community.boomi.com business continuity integration platform
-```
 
 ---
 
@@ -497,12 +497,13 @@ When used alongside `boomi-health-check`, this skill enriches each check section
 
 | Health Check Section | Best Practice Category | What to Enrich |
 |---|---|---|
-| Runtime Status | §1 Runtime Configuration | Add version currency check, HA recommendation for single-node prod |
-| Execution Health | §3 Execution Health | Add error rate context, link to monitoring guidance |
-| Dead Processes | §2 Process Design | Add cleanup guidance, link to process lifecycle best practices |
-| Env Consistency | §5 Deployment | Add promotion pipeline guidance, link to deployment docs |
-| Security | §4 Security | Add role review guidance, link to RBAC docs, check recent security release notes |
-| API Gateway | §6 API Management | Add plan/rate limit guidance, check for cert expiry, link to API management docs |
+| Account info / licensing | §1 Account & Licensing | Support renewal, entitlement gaps, orphaned users |
+| Runtime Status | §2 Runtime Infrastructure | Version currency, HA, DR runbook, atom certs |
+| Dead Processes | §3 Integration Design | Cleanup guidance, process lifecycle best practices |
+| Env Consistency | §4 Deployment & Environments | Promotion pipeline guidance, deployment docs |
+| Execution Health | §5 Execution & Observability | Error rate context, monitoring guidance, silent failures |
+| Security | §6 Security & Governance | Role review, RBAC docs, recent security release notes |
+| API Gateway | §7 API Management | Rate limiting, cert expiry, subscriber coverage |
 
 ### Enrichment output format
 

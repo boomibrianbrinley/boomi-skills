@@ -224,12 +224,13 @@ Map the `overallStatus` and check summary to an overall score:
 
 | Health Check | Best Practice Category | Key search terms |
 |---|---|---|
-| runtimeStatus | §1 Runtime Configuration | atom startup properties, molecule HA, JVM heap |
-| executionHealth | §3 Execution Health | execution error rate, monitoring, alerting |
-| deadProcesses | §2 Process Design | dead process cleanup, process lifecycle |
-| envConsistency | §5 Deployment | environment promotion, deployment pipeline |
-| security | §4 Security | RBAC, environment role restrictions, audit log |
-| apiGateway | §6 API Management | gateway configuration, rate limiting, certificates |
+| account / licensing | §1 Account & Licensing | support renewal, entitlements, user management |
+| runtimeStatus | §2 Runtime Infrastructure | atom startup properties, molecule HA, JVM heap, atom certs |
+| deadProcesses | §3 Integration Design | dead process cleanup, process lifecycle, error handling |
+| envConsistency | §4 Deployment & Environments | environment promotion, deployment pipeline |
+| executionHealth | §5 Execution & Observability | execution error rate, monitoring, alerting, silent failures |
+| security | §6 Security & Governance | RBAC, environment role restrictions, audit log |
+| apiGateway | §7 API Management | gateway configuration, rate limiting, certificates |
 
 **Minimum documentation check per report:** At a minimum, always search for:
 ```

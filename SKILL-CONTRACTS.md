@@ -13,10 +13,10 @@ Formal cross-skill input/output contracts. Each skill that produces output for a
 
 ```
 {
-  check: "runtimeStatus" | "executionHealth" | "deadProcesses" | "envConsistency" | "security" | "apiGateway",
+  check: "account" | "runtimeStatus" | "executionHealth" | "deadProcesses" | "envConsistency" | "security" | "apiGateway",
   status: "fail" | "warn",
   finding: string,           // 1-sentence plain-English description of the finding
-  category: string           // §1–§6 from best-practices (see mapping table in health-check SKILL.md)
+  category: string           // §1–§7 from best-practices (see mapping table in health-check SKILL.md)
 }
 ```
 
