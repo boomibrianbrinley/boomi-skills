@@ -1,0 +1,6 @@
+# macOS
+.DS_Store
+
+# Session transcripts
+session_transcript.md
+**/session_transcript.md
