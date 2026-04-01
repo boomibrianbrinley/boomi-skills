@@ -120,50 +120,60 @@ site:help.boomi.com user management deactivate account
 
 **Health check mapping:** `runtimeStatus`, runtime configuration, business continuity
 
+> **Deep reference:** For detailed technical practices with specific JVM flags, NFS mount options, forked execution memory math, clustering requirements, and OS sizing — read `references/runtime-infrastructure-guide.md` before generating recommendations in this category.
+
 **What good looks like:**
-- All runtimes ONLINE with version within 1–2 releases of current
-- JVM heap sized appropriately for workload (minimum 1GB, recommended 2–4GB for production)
-- Working data directory on fast local I/O (SSD), not network-mounted storage
-- Purge history configured (recommended: 30–60 days, never 0/disabled in production)
-- Observability/logging enabled and pointed at a log aggregator
-- Release schedule set to SCHEDULED (not MANUAL) unless intentional for the environment
-- Production Molecules have ≥ 2 nodes (HA configuration)
-- Disaster recovery runbook documented and tested annually
-- Atom-level certificates (SSL/TLS, PGP) valid and not expiring within 30 days
+- All runtimes ONLINE, version within 1–2 releases of current, running Amazon Corretto OpenJDK
+- JVM heap set with `-Xms` = `-Xmx` (no dynamic resizing); minimum 2–4 GB for production
+- G1GC enabled (`-XX:+UseG1GC`) with `HeapDumpOnOutOfMemoryError` configured
+- Working data directory on local SSD, not NFS/SMB; `70%` disk utilization alert in place
+- Purge history configured (30 days for production; never 0 which disables purging)
+- Release schedule set to SCHEDULED with a maintenance window; within 1–2 releases of current
+- Production Molecules have ≥ 3 nodes on separate hosts/AZs; load balancer in front
+- Forked execution enabled on Molecules; runner heap and concurrency tuned to node RAM
+- Disaster recovery runbook documented, tested annually; config backed up to version control
+- Atom-level certificates valid; 60-day alert, 30-day P1 threshold
 
 **Common anti-patterns to flag:**
-- Runtime on same host as database or other memory-intensive services
-- Working data directory on NFS/SMB/network share
+- `-Xms` and `-Xmx` set to different values (dynamic heap resizing = GC pauses)
+- Oracle JDK instead of Amazon Corretto on Java 11+ (unsupported configuration)
+- Working data directory on NFS/SMB (latency and locking issues) or `/tmp` (OS may purge)
 - Purge history disabled (`purgeHistoryDays: 0`) — causes unbounded disk growth
-- Runtime version 3+ releases behind current — security exposure + unsupported configuration
+- Runtime version 3+ releases behind current — security exposure, unsupported
 - MANUAL release schedule on production runtimes without a documented reason
-- Single-node Molecule in production (single point of failure)
-- No documented runbook for runtime failure or outage
-- Atom-level certificates expired or within 30 days of expiry
+- Single-node Basic Atom or 2-node Molecule in production (no quorum safety)
+- All Molecule nodes on the same physical host or availability zone (correlated failure risk)
+- Forked execution not enabled on production Molecules
+- Peak forked RAM not calculated: `Runner Heap × Max Simultaneous Forked Executions × Nodes`
+- No DR runbook; configuration not version-controlled
+- Atom co-located with database or other memory-intensive services
+- High-frequency listener processes and batch processes on the same runtime
 
 **WebSearch queries to run:**
 ```
 site:help.boomi.com atom startup properties
-site:help.boomi.com "working data" directory performance
-site:help.boomi.com "purge history" settings
-site:community.boomi.com atom JVM heap best practices
-"boomi molecule" sizing recommendations high availability
-site:help.boomi.com runtime release schedule
-site:help.boomi.com Molecule high availability configuration
+site:help.boomi.com "working data" directory performance local storage molecule
+site:help.boomi.com "purge history" settings independent purge schedules
+site:community.boomi.com atom JVM heap best practices G1GC
+"boomi molecule" sizing recommendations forked execution memory
+site:help.boomi.com runtime release schedule rolling update
+site:help.boomi.com Molecule high availability configuration NFS
 site:community.boomi.com disaster recovery boomi best practices
-site:help.boomi.com certificate management renewal atom
+site:help.boomi.com OpenTelemetry observability runtimes
+site:community.boomi.com "forked execution" memory sizing
 ```
 
 **Key documentation areas on help.boomi.com:**
-- Integration → Atom Management → Atom Properties
+- Integration → Atom Management → Atom Properties (startup, advanced properties)
 - Integration → Atom Management → Runtime Release Schedules
-- Integration → Atom Management → Observability Settings
-- Integration → Molecule & Cloud Configuration
+- Integration → Atom Management → Observability Settings (OpenTelemetry)
+- Integration → Molecule & Cloud Configuration → Local Storage
+- Integration → Forked Execution in Molecules and Atom Clouds
 - Platform → Certificates → Atom Certificates
 
 **Release notes check:**
 ```
-"boomi release notes" "atom" OR "runtime" 2024 OR 2025 "startup properties" OR "JVM"
+"boomi release notes" "atom" OR "runtime" 2024 OR 2025 "startup properties" OR "JVM" OR "OpenTelemetry"
 ```
 
 **Recommendation framing:**
@@ -194,6 +204,10 @@ Covers both general process design patterns and specialized integration patterns
 - Overly long processes (> 30 shapes) that should be decomposed into subprocesses
 - Hard-coded values in process properties instead of environment extensions
 - Connectors with credentials embedded in connection components (not extensions)
+- "Allow Simultaneous Executions" enabled on processes that write to shared state (race conditions)
+- Low Latency mode not used for high-frequency API/listener processes (<30 sec duration)
+- Large data sets loaded into a single document instead of split-and-process batching (heap exhaustion risk)
+- No heartbeat tracking fields on scheduled processes (silent success failures undetectable)
 
 **WebSearch queries to run:**
 ```
@@ -296,20 +310,25 @@ site:community.boomi.com "environment consistency" deployment
 | > 15% | Critical | Immediate action required |
 
 **What good looks like:**
-- Production error rate < 5% (target < 2%)
+- Production error rate < 5% (target < 2%); alert at >5%, escalate at >15% over rolling 1-hour window
 - All deployed processes executed at least once per business cycle
-- Scheduled processes staggered to avoid concurrent resource contention
-- Execution history searchable (tracking fields populated, execution summary meaningful)
-- Alerts configured for process failures (audit log or external monitoring)
-- Dashboards or external observability tooling reflect real-time execution health
+- Scheduled processes staggered to avoid concurrent resource contention (stagger by 2–5 minutes)
+- OpenTelemetry enabled on all runtimes; telemetry routed to a centralized observability platform (Datadog, New Relic, Dynatrace, Splunk)
+- Atom heartbeat monitoring process runs on a schedule and posts to an external healthcheck endpoint (PagerDuty, UptimeRobot)
+- Execution history searchable (custom tracked fields populated, execution summary meaningful)
+- Heartbeat tracking fields on all scheduled processes to detect "silent success" failures (status=COMPLETE but 0 documents processed)
+- Per-node Molecule metrics (JVM heap, thread count, active executions) exported via OTel for capacity planning
 
 **Common anti-patterns to flag:**
 - High-frequency schedules (every minute) on resource-intensive processes
 - Multiple processes scheduled at the same minute without load balancing
 - Processes with consistent ABORTED status (indicates runtime resource pressure)
-- Executions with high inboundErrorDocumentCount but status COMPLETE (silent failures)
-- No monitoring/alerting configured beyond Boomi's native notifications
-- No component backup/export schedule for disaster recovery
+- Executions with high `inboundErrorDocumentCount` but status COMPLETE (silent failures — no documents processed but process reports success)
+- No tracking fields — execution history not searchable beyond status/date
+- No external monitoring/alerting; relying solely on Boomi's native notifications
+- No Atom heartbeat process — Boomi platform detection of offline Atom may be delayed
+- Low Latency mode not used for high-frequency, short-duration API/listener processes (missing 30–50% throughput improvement)
+- Simultaneous executions enabled on processes writing to shared state (race conditions)
 
 **WebSearch queries to run:**
 ```
@@ -317,14 +336,17 @@ site:help.boomi.com execution record monitoring
 site:community.boomi.com execution "error rate" threshold
 "boomi" process schedule overlap best practices
 site:help.boomi.com "process scheduling" concurrent
-"boomi atomsphere" execution monitoring alerting
+site:help.boomi.com OpenTelemetry observability runtimes
 site:community.boomi.com "silent failure" OR "error document" boomi
 site:help.boomi.com "custom tracked fields" execution history
+site:help.boomi.com "low latency" process mode
+site:community.boomi.com atom heartbeat monitoring process
+site:community.boomi.com functional monitoring integration processes
 ```
 
 **Release notes check:**
 ```
-"boomi release notes" "execution" OR "scheduler" 2024 OR 2025
+"boomi release notes" "execution" OR "scheduler" OR "OpenTelemetry" 2024 OR 2025
 ```
 
 ---
@@ -350,6 +372,12 @@ site:help.boomi.com "custom tracked fields" execution history
 - API tokens that have never been rotated (check audit log for token creation date)
 - Accounts with no custom roles (over-reliance on broad built-in roles)
 - Audit log not monitored or reviewed
+- Atom process running as root or a domain admin (should use a non-privileged dedicated OS service account)
+- Connector credentials (passwords, API keys) stored as hardcoded values in connection components — should use Environment Extensions or encrypted process properties
+- Shared CA certificates bundled in connector components instead of deployed to the Atom truststore
+- mTLS not enabled for inbound web service endpoints receiving sensitive data
+- Molecule NFS shared mount accessible to OS users other than the Molecule service account
+- TLS 1.0 or 1.1 enabled on the Atom Shared Web Server (minimum: TLS 1.2)
 
 **WebSearch queries to run:**
 ```
