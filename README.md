@@ -41,6 +41,11 @@ Generates executive summaries and execution reports from your live Boomi account
 Ask for a quick inline summary or a branded PDF scorecard — covering account activity,
 user changes, configuration events, integration performance, and anomaly detection.
 
+### [`global-utilities`](global-utilities/README.md)
+General-purpose utilities available in any project or conversation. Currently includes
+public IP address lookup via ipify.org — useful for firewall allowlisting, VPN verification,
+or any time you need to know what IP the outside world sees.
+
 ---
 
 ## Installation
