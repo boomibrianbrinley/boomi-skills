@@ -42,9 +42,14 @@ Ask for a quick inline summary or a branded PDF scorecard — covering account a
 user changes, configuration events, integration performance, and anomaly detection.
 
 ### [`global-utilities`](global-utilities/README.md)
-General-purpose utilities available in any project or conversation. Currently includes
-public IP address lookup via ipify.org — useful for firewall allowlisting, VPN verification,
-or any time you need to know what IP the outside world sees.
+General-purpose utilities available in any project or conversation: public IP lookup,
+current date/time in any timezone, DNS record resolution, and SSL certificate checking.
+No project-specific context required — useful everywhere.
+
+### [`git-conventions`](git-conventions/README.md)
+Consistent git patterns for every session: commit message format, branch naming, PR
+structure, submodule workflows, staging safety rules, and standard `.gitignore` defaults.
+Install once and Claude applies these conventions automatically across all projects.
 
 ---
 
