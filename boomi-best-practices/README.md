@@ -116,6 +116,17 @@ cd ~/boomi-skills && git pull
 
 ---
 
+## Requirements
+
+| Dependency | Required for | Notes |
+|---|---|---|
+| **WebSearch** (Claude capability) | All recommendations | Used to query `help.boomi.com`, `community.boomi.com`, and Boomi release notes in real time. Must be enabled in your Claude session. |
+| **WebFetch** (Claude capability) | Full documentation coverage | Used to retrieve the content of individual documentation pages found via search. Must be enabled in your Claude session. |
+
+No MCP server or additional software installs are required.
+
+---
+
 ## Related skills
 
 - **`boomi-health-check`** — Uses this skill to enrich health check findings (recommended pair)

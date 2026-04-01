@@ -99,9 +99,12 @@ ln -s ~/boomi-skills/boomi-release-analyzer ~/.claude/skills/boomi-release-analy
 
 ## Requirements
 
-- The **Boomi Platform API Explorer** MCP server must be running and connected to your Boomi
-  account — this is how Claude pulls your deployed integrations
-- The **`boomi-branding`** skill should also be installed for properly formatted HTML reports
+| Dependency | Required for | Notes |
+|---|---|---|
+| **Boomi Platform API Explorer** (MCP server) | Fetching deployed integrations | Must be running and connected to your account. Provides `boomi_list_deployed_packages` and `boomi_get_component_diff`. |
+| **WebSearch** (Claude capability) | Fetching live release notes | Used to locate and retrieve Boomi release notes from `help.boomi.com`. Must be enabled in your Claude session. |
+| **WebFetch** (Claude capability) | Following release note sub-pages | Boomi release notes link out to detail pages — WebFetch is used to pull those pages for full coverage. Must be enabled in your Claude session. |
+| **`boomi-branding`** skill | HTML report output | Recommended. Ensures the impact report uses correct Boomi colors, fonts, and layout. |
 
 ---
 

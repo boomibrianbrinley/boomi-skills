@@ -108,9 +108,21 @@ ln -s ~/boomi-skills/boomi-reporting ~/.claude/skills/boomi-reporting
 
 ## Requirements
 
-- The **Boomi Platform API Explorer** MCP server must be running and connected to your
-  Boomi account — this is how Claude pulls live execution and audit data
-- The **`boomi-branding`** skill should be installed for properly formatted PDF output
+| Dependency | Required for | Notes |
+|---|---|---|
+| **Boomi Platform API Explorer** (MCP server) | All report types | Must be running and connected to your Boomi account. Provides `boomi_query_executions`, `boomi_query_audit_log`, `boomi_analyze_execution_anomalies`, and `boomi_list_accounts`. |
+| **Python 3** with `reportlab` | PDF scorecard output | Install with `pip install reportlab`. Only needed if you request PDF output — inline summaries have no Python dependency. |
+| **`boomi-branding`** skill | PDF output formatting | Recommended. Ensures PDF scorecards use correct Boomi colors, fonts, and layout. |
+
+**Installing reportlab:**
+```bash
+pip install reportlab
+# or, in a virtual environment:
+uv pip install reportlab
+```
+
+PDF generation also downloads the Poppins font files from Google Fonts at runtime —
+an internet connection is required the first time a PDF is generated on a new machine.
 
 ---
 

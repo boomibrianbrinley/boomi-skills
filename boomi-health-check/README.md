@@ -109,11 +109,11 @@ ln -s ~/boomi-skills/boomi-health-check ~/.claude/skills/boomi-health-check
 
 ## Requirements
 
-- The **Boomi Platform API Explorer** MCP server must be running and connected to your Boomi
-  account — this is how Claude pulls live data from your account
-- The **`boomi-best-practices`** skill should also be installed — it enriches each health
-  check finding with live documentation from Boomi's official help site and community
-- The **`boomi-branding`** skill should be installed if you want branded HTML or PowerPoint output
+| Dependency | Required for | Notes |
+|---|---|---|
+| **Boomi Platform API Explorer** (MCP server) | All health checks | Must be running and connected to your account. Provides `boomi_health_check_summary`, `boomi_get_account_info`, `boomi_list_runtimes`, `boomi_get_runtime_details`, and `boomi_generate_health_report`. |
+| **`boomi-best-practices`** skill | Enriched recommendations | Recommended. Searches `help.boomi.com` and Boomi Community in real time to back each finding with official guidance. |
+| **`boomi-branding`** skill | Branded HTML and PowerPoint output | Recommended. Required if you want the report delivered as a formatted HTML file or PowerPoint presentation. |
 
 ---
 

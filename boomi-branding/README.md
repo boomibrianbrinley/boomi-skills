@@ -101,6 +101,14 @@ cd ~/boomi-skills && git pull
 
 ---
 
+## Requirements
+
+This skill has no runtime dependencies — it is purely reference material that Claude reads when generating output. No MCP server, no external tools, and no additional installs are required.
+
+An internet connection is useful if you want Claude to cross-reference the live [Boomi Exosphere design system](https://exosphere.boomi.com) for the most current component specifications, but it is not required for the skill to function.
+
+---
+
 ## Design system reference
 
 This skill is built on the [Boomi Exosphere design system](https://exosphere.boomi.com).
