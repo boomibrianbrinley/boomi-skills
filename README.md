@@ -53,6 +53,17 @@ Install once and Claude applies these conventions automatically across all proje
 
 ---
 
+## MCP Server
+
+### [`mcp-server`](mcp-server/README.md)
+Exposes all skills to **Claude Desktop, Gemini CLI, Cursor, and any other MCP-compatible
+AI tool** — not just Claude Code CLI. The server auto-starts when the AI tool launches,
+provides `list_skills`, `get_skill`, and `update_skills` tools, and works on macOS,
+Linux, and Windows 11. A one-time `node register.mjs` wires it into every detected tool
+automatically.
+
+---
+
 ## Installation
 
 Skills are installed into `~/.claude/skills/` — a directory that both **Claude Desktop**

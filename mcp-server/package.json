@@ -1,0 +1,16 @@
+{
+  "name": "boomi-skills-server",
+  "version": "1.0.0",
+  "description": "MCP server that exposes boomi-skills content to Claude Desktop",
+  "type": "module",
+  "main": "index.mjs",
+  "scripts": {
+    "start": "node index.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
