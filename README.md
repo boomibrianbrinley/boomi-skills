@@ -36,6 +36,12 @@ Ensures every recommendation Claude makes about your Boomi account is backed by 
 Boomi documentation. Before giving advice, it searches `help.boomi.com`, the Boomi Community,
 and release notes in real time — so guidance is current, cited, and trustworthy.
 
+### [`boomi-log-troubleshooter`](boomi-log-troubleshooter/README.md)
+Diagnoses Boomi container and process logs by combining log analysis with internal Confluence
+knowledge. Surfaces critical errors, warnings, and root causes — then searches the ASE and SUP
+Confluence spaces for matching runbooks, known issues, and resolution steps. Produces a structured
+diagnosis report with findings, Confluence links, and prioritized next steps.
+
 ### [`boomi-reporting`](boomi-reporting/README.md)
 Generates executive summaries and execution reports from your live Boomi account data.
 Ask for a quick inline summary or a branded PDF scorecard — covering account activity,
