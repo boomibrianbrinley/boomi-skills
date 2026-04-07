@@ -1,15 +1,14 @@
 # Boomi Skills
 
+> **⚠ This repository has moved.**
+> The canonical location is now **[boomi-internal/boomi-ai-skills](https://github.com/boomi-internal/boomi-ai-skills)**.
+> This repo is archived and will no longer receive updates. Please update any bookmarks, clones, or submodule references.
+
 Centralized [Claude Code](https://claude.ai/code) skills for Boomi projects.
 
 Skills in this repo provide Claude with Boomi-specific design standards, coding patterns,
 and reference material so that any project can produce consistent, on-brand output without
 repeating the same context in every conversation.
-
-> **⚠ Temporary home.** This repo is a shared starting point for the team while we work toward
-> a permanent shared repository under a team or organization license. Once that's in place, the
-> canonical location will move and this repo will redirect accordingly. In the meantime, treat
-> this as the working source of truth.
 
 ---
 
@@ -80,7 +79,7 @@ and **Claude Code CLI** load automatically. Install once and every project has a
 Open Terminal and run:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/boomibrianbrinley/boomi-skills/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/boomi-internal/boomi-ai-skills/main/install.sh)
 ```
 
 Then **quit and reopen Claude Desktop**. Skills load on startup.
@@ -90,7 +89,7 @@ Then **quit and reopen Claude Desktop**. Skills load on startup.
 Open PowerShell and run:
 
 ```powershell
-irm https://raw.githubusercontent.com/boomibrianbrinley/boomi-skills/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/boomi-internal/boomi-ai-skills/main/install.ps1 | iex
 ```
 
 Then **quit and reopen Claude Desktop**. Skills load on startup.
@@ -98,7 +97,7 @@ Then **quit and reopen Claude Desktop**. Skills load on startup.
 ### Claude Code CLI (macOS / Linux / WSL) — install all skills
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/boomibrianbrinley/boomi-skills/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/boomi-internal/boomi-ai-skills/main/install.sh)
 ```
 
 No restart needed — skills are available in your next Claude Code session.
@@ -132,19 +131,19 @@ the installer:
 
 ```bash
 # From the project root
-bash <(curl -fsSL https://raw.githubusercontent.com/boomibrianbrinley/boomi-skills/main/add-to-project.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/boomi-internal/boomi-ai-skills/main/add-to-project.sh)
 ```
 
 ### Windows (PowerShell)
 
 ```powershell
-irm https://raw.githubusercontent.com/boomibrianbrinley/boomi-skills/main/add-to-project.ps1 | iex
+irm https://raw.githubusercontent.com/boomi-internal/boomi-ai-skills/main/add-to-project.ps1 | iex
 ```
 
 Or manually:
 
 ```bash
-git submodule add -b main https://github.com/boomibrianbrinley/boomi-skills.git skills/boomi-skills
+git submodule add -b main https://github.com/boomi-internal/boomi-ai-skills.git skills/boomi-skills
 git submodule update --init --recursive
 ```
 
